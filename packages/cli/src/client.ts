@@ -40,11 +40,10 @@ export async function sendCommand(request: Request): Promise<Response> {
           error: [
             "Chrome extension not connected.",
             "",
-            "Install the extension:",
-            "  Option A: load node_modules/bb-browser/extension/",
-            "  Option B: download zip from https://github.com/epiral/bb-browser/releases/latest",
-            "",
-            "Then: chrome://extensions/ → Developer Mode → Load unpacked → select the extension folder",
+            "1. Download extension: https://github.com/epiral/bb-browser/releases/latest",
+            "2. Unzip the downloaded file",
+            "3. Open chrome://extensions/ → Enable Developer Mode",
+            "4. Click \"Load unpacked\" → select the unzipped folder",
           ].join("\n"),
         };
       }

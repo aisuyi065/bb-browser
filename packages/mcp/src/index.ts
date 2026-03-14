@@ -11,11 +11,10 @@ import { z } from "zod";
 const EXT_HINT = [
   "Chrome extension not connected.",
   "",
-  "Install the extension:",
-  "  Option A: npm install -g bb-browser, then load node_modules/bb-browser/extension/",
-  "  Option B: Download zip from https://github.com/epiral/bb-browser/releases/latest",
-  "",
-  "Then: chrome://extensions/ → Developer Mode → Load unpacked → select the extension folder",
+  "1. Download extension: https://github.com/epiral/bb-browser/releases/latest",
+  "2. Unzip the downloaded file",
+  "3. Open chrome://extensions/ → Enable Developer Mode",
+  "4. Click \"Load unpacked\" → select the unzipped folder",
 ].join("\n");
 
 function getDaemonPath(): string {
