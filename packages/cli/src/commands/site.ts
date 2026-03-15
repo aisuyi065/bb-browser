@@ -15,6 +15,7 @@
 
 import { generateId, type Request, type Response, type TabInfo } from "@bb-browser/shared";
 import { handleJqResponse, sendCommand } from "../client.js";
+import { getHistoryDomains } from "../history-sqlite.js";
 import { ensureDaemonRunning } from "../daemon-manager.js";
 import { readFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -370,18 +371,7 @@ function siteInfo(name: string, options: SiteOptions): void {
 
 async function siteRecommend(options: SiteOptions): Promise<void> {
   const days = options.days ?? 30;
-  const response = await sendCommand({
-    id: generateId(),
-    action: "history",
-    historyCommand: "domains",
-    ms: days,
-  });
-
-  if (!response.success) {
-    throw new Error(response.error || "History command failed");
-  }
-
-  const historyDomains: HistoryDomain[] = response.data?.historyDomains || [];
+  const historyDomains: HistoryDomain[] = getHistoryDomains(days);
   const sites = getAllSites();
   const sitesByDomain = new Map<string, SiteMeta[]>();
 
@@ -422,7 +412,7 @@ async function siteRecommend(options: SiteOptions): Promise<void> {
   };
 
   if (options.jq) {
-    handleJqResponse({ id: generateId(), success: true, data: jsonData });
+    handleJqResponse({ id: generateId(), success: true, data: jsonData as any });
   }
 
   if (options.json) {

@@ -6,7 +6,7 @@
  *   bb-browser history domains          查看访问最多的域名
  */
 
-import { sendCommand } from "../client.js";
+import { getHistoryDomains, searchHistory } from "../history-sqlite.js";
 
 interface HistoryOptions {
   json?: boolean;
@@ -18,24 +18,19 @@ export async function historyCommand(
   subCommand: 'search' | 'domains',
   options: HistoryOptions = {}
 ): Promise<void> {
-  const response = await sendCommand({
-    id: crypto.randomUUID(),
-    action: "history",
-    historyCommand: subCommand,
-    text: options.query,
-    ms: options.days,
-  });
+  const days = options.days || 30;
+  const data = subCommand === "search"
+    ? { historyItems: searchHistory(options.query, days) }
+    : { historyDomains: getHistoryDomains(days) };
 
   if (options.json) {
-    console.log(JSON.stringify(response));
+    console.log(JSON.stringify({
+      id: crypto.randomUUID(),
+      success: true,
+      data,
+    }));
     return;
   }
-
-  if (!response.success) {
-    throw new Error(response.error || "History command failed");
-  }
-
-  const data = response.data;
 
   switch (subCommand) {
     case "search": {

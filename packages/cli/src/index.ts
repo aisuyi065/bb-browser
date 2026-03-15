@@ -1,18 +1,5 @@
 /**
  * bb-browser CLI 入口
- *
- * 用法：
- *   bb-browser open <url>     打开指定 URL
- *   bb-browser snapshot       获取当前页面快照
- *   bb-browser daemon         前台启动 Daemon
- *   bb-browser start          前台启动 Daemon（别名）
- *   bb-browser stop           停止 Daemon
- *   bb-browser status         查看 Daemon 状态
- *   bb-browser --help         显示帮助信息
- *   bb-browser --version      显示版本号
- *
- * 全局选项：
- *   --json                    以 JSON 格式输出
  */
 
 import { fileURLToPath } from "node:url";
@@ -28,7 +15,7 @@ import { screenshotCommand } from "./commands/screenshot.js";
 import { waitCommand } from "./commands/wait.js";
 import { pressCommand } from "./commands/press.js";
 import { scrollCommand } from "./commands/scroll.js";
-import { daemonCommand, stopCommand, statusCommand } from "./commands/daemon.js";
+import { statusCommand } from "./commands/daemon.js";
 import { reloadCommand } from "./commands/reload.js";
 import { backCommand, forwardCommand, refreshCommand } from "./commands/nav.js";
 import { checkCommand, uncheckCommand } from "./commands/check.js";
@@ -46,10 +33,13 @@ import { siteCommand } from "./commands/site.js";
 import { historyCommand } from "./commands/history.js";
 import { setJqExpression } from "./client.js";
 
-const VERSION = "0.7.0";
+const VERSION = "0.8.0";
 
 const HELP_TEXT = `
 bb-browser - AI Agent 浏览器自动化工具
+
+安装：
+  npm install -g bb-browser
 
 提示：大多数数据获取任务请直接使用 site 命令，无需手动操作浏览器：
   bb-browser site list                    查看所有可用命令
@@ -88,6 +78,7 @@ bb-browser - AI Agent 浏览器自动化工具
 
 标签页：
   tab [list|new|close|<n>]     管理标签页
+  status                       查看受管浏览器状态
 
 导航：
   back / forward / refresh     后退 / 前进 / 刷新
@@ -101,6 +92,8 @@ bb-browser - AI Agent 浏览器自动化工具
 
 选项：
   --json               以 JSON 格式输出
+  --port <n>           指定 Chrome CDP 端口
+  --openclaw           优先复用 OpenClaw 浏览器实例
   --jq <expr>          对 JSON 输出应用 jq 过滤（直接作用于数据，跳过 id/success 信封）
   -i, --interactive    只输出可交互元素（snapshot 命令）
   -c, --compact        移除空结构节点（snapshot 命令）
@@ -127,6 +120,7 @@ interface ParsedArgs {
     days?: number;
     jq?: string;
     openclaw?: boolean;
+    port?: number;
   };
 }
 
@@ -165,6 +159,12 @@ function parseArgs(argv: string[]): ParsedArgs {
       }
     } else if (arg === "--openclaw") {
       result.flags.openclaw = true;
+    } else if (arg === "--port") {
+      skipNext = true;
+      const nextIdx = args.indexOf(arg) + 1;
+      if (nextIdx < args.length) {
+        result.flags.port = parseInt(args[nextIdx], 10);
+      }
     } else if (arg === "--help" || arg === "-h") {
       result.flags.help = true;
     } else if (arg === "--version" || arg === "-v") {
